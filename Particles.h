@@ -43,30 +43,3 @@ public:
 private:
   int radius_;
 };
-
-template <class T, int ElementCount>
-struct EntityManager
-{
-public:
-  int Size() const {return ElementCount;}
-  T items[ElementCount];
-  virtual bool Add(const T& item)
-  {
-    for (int i = 0; i < ElementCount; i++) {
-      if (!items[i].IsValid()) {
-        items[i] = item;
-        break;
-      }
-    }
-  }
-  int Count() const
-  {
-    int result = 0;
-    for (int i = 0; i < ElementCount; i++) {
-      if (items[i].IsValid()) {
-        result++;
-      }
-    }
-    return result;
-  }
-};

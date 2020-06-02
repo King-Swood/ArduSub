@@ -21,112 +21,96 @@ class Game {
 public:
   Game() = default;
   Sub sub;
-  
-  static const int MinesLength = 20;
-  Mine mines[MinesLength];
-  int minesCount;
+
+  ObjectManager<Mine, 20> mines;
   
   long unsigned originalTimeMS;
   long unsigned nextMineTimeMS;
   GameState state;
   GameState lastState;
 
+  void Reset()
+  {
+    state = GameState::Running;
+    sub = Sub(0, 10);
+    for (Mine& mine : mines.items) {
+      mine = Mine();
+    }
+    originalTimeMS = millis();
+    nextMineTimeMS = millis() + random(1000);
+  
+  #if TEST_COLLISIONS
+    for (Mine& mine : game->mines) {
+      AddMine(true);
+    }
+  #endif
+  }
+  
+  void Update()
+  {
+    bool firstTime = (state != lastState);
+    lastState = state;
+  
+    switch (state) {
+      case GameState::Running:
+        sub.Update();
+        
+        mines.UpdateAll([](Mine& mine, Game* game)
+        {
+          if (game->sub.IsColliding(mine)) {
+            game->sub.Invalidate();
+          }
+        }, this);
+        
+        if (millis() > nextMineTimeMS) {
+          AddMine();
+          nextMineTimeMS = millis() + random(1000);
+        }
+        if (!sub.IsValid()) {
+          state = GameState::Finished;
+        }
+        break;
+      case GameState::Finished:
+        break;
+      case GameState::Size:
+        break;
+    }
+  }
+
+  void Draw()
+  {
+    switch (state) {
+      case GameState::Running:
+        sub.Draw();
+        mines.DrawAll();
+        break;
+      case GameState::Finished:
+        sub.Draw();
+        break;
+      case GameState::Size:
+        break;
+    }
+    arduboy.drawRect(0, 0, WIDTH, HEIGHT);
+  }
+
   void AddMine(bool fixedPosition = false)
   {
-    if (minesCount < MinesLength) {
-      minesCount++;
-      for (int i = 0; i < MinesLength; i++) {
-        if (!mines[i].IsValid()) {
-          int radius = random(2, 5);
-          if (fixedPosition) {
-            mines[i] = Mine(random(1, (WIDTH-(radius << 1))),
-              random(1, (HEIGHT-(radius << 1))),
-              radius);
-          }
-          else {
-            mines[i] = Mine(WIDTH-1,
-              random(0, (HEIGHT-(radius << 1))),
-              radius);
-            mines[i].SetVelocity(-1, 0);
-          }
-          break;
-        }
+    int radius = random(2, 5);
+    if (fixedPosition) {
+      mines.Add(Mine(random(1, (WIDTH-(radius << 1))),
+        random(1, (HEIGHT-(radius << 1))),
+        radius));
+    }
+    else {
+      int index = mines.Add(Mine(WIDTH-1,
+        random(0, (HEIGHT-(radius << 1))),
+        radius));
+      if (index >= 0) {
+      mines[index].SetVelocity(-1, 0);
       }
     }
   }
 };
-
-void GameInit(struct Game *game)
-{
-  game->state = GameState::Running;
-  game->sub = Sub(0, 10);
-  for (Mine& mine : game->mines) {
-    mine = Mine();
-  }
-  game->minesCount = 0;
-  game->originalTimeMS = millis();
-  game->nextMineTimeMS = millis() + random(1000);
-
-#if TEST_COLLISIONS
-  for (Mine& mine : game->mines) {
-    game->AddMine(true);
-  }
-#endif
-}
-
-void GameUpdate(Game *game)
-{
-  bool firstTime = (game->state != game->lastState);
-  game->lastState = game->state;
-
-  switch (game->state) {
-    case GameState::Running:
-      game->sub.Update();
-      for (auto& mine : game->mines) {
-        if (mine.IsValid()) {
-          mine.Update();
-          if (game->sub.IsColliding(mine)) {
-            game->sub.Invalidate();
-          }
-          if (!mine.IsValid()) {
-            game->minesCount--;
-          }
-        }
-      }
-      if (millis() > game->nextMineTimeMS) {
-        game->AddMine();
-        game->nextMineTimeMS = millis() + random(1000);
-      }
-      if (!game->sub.IsValid()) {
-        game->state = GameState::Finished;
-      }
-      break;
-    case GameState::Finished:
-      break;
-    case GameState::Size:
-      break;
-  }
-}
-
-void GameDraw(Game *game)
-{
-  switch (game->state) {
-    case GameState::Running:
-      game->sub.Draw();
-      for (const auto& mine : game->mines) {
-        if (mine.IsValid()) {
-          mine.Draw();
-        }
-      }
-      break;
-    case GameState::Finished:
-      game->sub.Draw();
-      break;
-    case GameState::Size:
-      break;
-  }
-  arduboy.drawRect(0, 0, WIDTH, HEIGHT);
-}
 
 struct Title {
   long unsigned lastTimeMS;
@@ -220,10 +204,10 @@ void loop() {
       break;
     case State::Game:
       if (firstTime) {
-        GameInit(&game);
+        game.Reset();
       }
-      GameUpdate(&game);
-      GameDraw(&game);
+      game.Update();
+      game.Draw();
       if (game.state == GameState::Finished) {
         currentState = State::Title;
       }

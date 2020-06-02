@@ -11,7 +11,7 @@ public:
   Bubble(int x, int y):
     ObjectBase(x,y,true)
   {
-    SetVelocity(0, -1);
+    SetVelocity(0, -5);
   }
 
   int Width() const override {1;}
@@ -27,6 +27,6 @@ public:
   }
   void Draw() override
   {
-    arduboy.drawPixel(x_, y_);
+    arduboy.drawPixel(x_/10, y_/10);
   }
 };

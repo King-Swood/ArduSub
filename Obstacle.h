@@ -20,7 +20,7 @@ public:
   {
     // The mine bounding box is smaller than the circle by 1 pixel on each side.
     // This means that the corners of the bounding box line up well with the "corners" of the circle.
-    return Rect(x_+1, y_+1, (radius_ << 1)-1, (radius_ << 1)-1);
+    return Rect((x_/10)+1, (y_/10)+1, (radius_ << 1)-1, (radius_ << 1)-1);
   }
   void Update() override
   {
@@ -34,7 +34,7 @@ public:
   void Draw() override
   {
     // The x,y coordinates are the center of the circle, so we need to correct for this when drawing.
-    arduboy.drawCircle(x_+radius_, y_+radius_, radius_);
+    arduboy.drawCircle((x_/10)+radius_, (y_/10)+radius_, radius_);
 #if TEST_COLLISIONS
     DrawBoundingBox();
 #endif

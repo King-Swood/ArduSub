@@ -33,13 +33,13 @@ public:
   
   Rect BoundingBox() const override
   {
-      return Rect(x_, y_+3, 8, 3);
+      return Rect(x_/10, (y_/10)+3, 8, 3);
   }
   
   void Update() override;
   void Draw() override
   {
-    Sprites::drawOverwrite(x_, y_, SubSprite, 0);
+    Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 0);
 #if TEST_COLLISIONS
     DrawBoundingBox();
 #endif

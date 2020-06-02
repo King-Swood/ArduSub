@@ -14,20 +14,21 @@ class Game {
 public:
   Game():
     sub(10,10),
+    mines(),
+    bubbles(),
     originalTimeMS(millis()),
     nextMineTimeMS(millis() + random(1000)),
     state(GameState::Running),
     lastState(GameState::Size)
   {
   #if TEST_COLLISIONS
-    for (Mine& mine : game->mines) {
+    for (int i = 0; i < mines.Size(); i++) {
       AddMine(true);
     }
   #endif
   }
     
   Sub sub;
-
   ObjectManager<Mine, 20> mines;
   ObjectManager<Bubble, 20> bubbles;
   
@@ -87,7 +88,7 @@ public:
 
   void AddMine(bool fixedPosition = false)
   {
-    int radius = random(2, 5);
+    int radius = random(2, 10);
     if (fixedPosition) {
       mines.Add(Mine(random(1, (WIDTH-(radius << 1))),
         random(1, (HEIGHT-(radius << 1))),
@@ -98,7 +99,8 @@ public:
         random(0, (HEIGHT-(radius << 1))),
         radius));
       if (index >= 0) {
-      mines[index].SetVelocity(-1, 0);
+        mines[index].SetVelocity(random(-15, -5), random(-3,4));
+//        mines[index].SetVelocity(-10, 0);
       }
     }
   }

@@ -18,29 +18,29 @@ extern Game game;
     else {
 #if !TEST_COLLISIONS
       if (arduboy.pressed(A_BUTTON) || arduboy.pressed(B_BUTTON)) {
-        y_ -= 1;
+        y_ -= 10;
       }
       else {
-        y_ += 1;
+        y_ += 5;
       }
 
       if ((millis() - lastBubble) >= bubblePeriod) {
         lastBubble = millis();
         bubblePeriod = random(750);
-        game.bubbles.Add(Bubble(x_-1, y_+1));
+        game.bubbles.Add(Bubble((x_/10)-1, (y_/10)+1));
       }
 #else 
       if (arduboy.pressed(LEFT_BUTTON)) {
-        x_ -= 1;
+        x_ -= 5;
       }
       if (arduboy.pressed(RIGHT_BUTTON)) {
-        x_ += 1;
+        x_ += 5;
       }
       if (arduboy.pressed(UP_BUTTON)) {
-        y_ -= 1;
+        y_ -= 5;
       }
       if (arduboy.pressed(DOWN_BUTTON)) {
-        y_ += 1;
+        y_ += 5;
       }
 #endif
     }

@@ -12,20 +12,20 @@ const Rect BoundScreen(0, 0, WIDTH, HEIGHT);
 struct Title {
   long unsigned lastTimeMS;
   bool hidden;
-  bool starGame;
+  bool startGame;
 };
 
 void TitleInit(struct Title *title)
 {
   title->lastTimeMS = millis();
   title->hidden = false; 
-  title->starGame = false;
+  title->startGame = false;
 }
 
 void TitleUpdate(Title *title)
 {
   if (arduboy.justPressed(A_BUTTON) || arduboy.justPressed(B_BUTTON)) {
-    title->starGame = true;
+    title->startGame = true;
   }
   
   if ((millis() - title->lastTimeMS) > 500) {
@@ -95,7 +95,7 @@ void loop() {
       }
       TitleUpdate(&title);
       TitleDraw(&title);
-      if (title.starGame) {
+      if (title.startGame) {
         currentState = State::Game;
       }
       break;

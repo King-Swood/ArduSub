@@ -3,13 +3,16 @@
 
 extern Arduboy2 arduboy;
 
+// Coordinates are multiplied by 10 in order to give us 0.1 pixel resolution.
+// This allows objects to move slower than 1 pixel per frame.
+// It also means that items need to be converted between this "internal" coordinate system and the screen coordinate system.
 class ObjectBase
 {
 public:
   ObjectBase() = default;
   ObjectBase(int x, int y, bool valid = false):
-    x_(x),
-    y_(y),
+    x_(x*10),
+    y_(y*10),
     valid_(valid)
   {}
 
@@ -30,8 +33,8 @@ public:
 
   void SetPosition(int x, int y)
   {
-    x_ = x;
-    y_ = y;
+    x_ = x*10;
+    y_ = y*10;
   }
 
   void SetVelocity(int x, int y)
@@ -42,7 +45,7 @@ public:
 
   virtual Rect BoundingBox() const
   {
-      return Rect(x_, y_, Width(), Height());
+      return Rect(x_/10, y_/10, Width(), Height());
   }
 
   bool IsColliding(const ObjectBase& other)

@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "Game.h"
 
+extern Game game;
 
   void Sub::Update()
   {
@@ -23,10 +24,10 @@
         y_ += 1;
       }
 
-      if ((millis() - lastBubble) >= nextBubble) {
+      if ((millis() - lastBubble) >= bubblePeriod) {
         lastBubble = millis();
-        nextBubble = random(750);
-//        game_.bubbles.Add(Bubble(x_-1, y_+1));
+        bubblePeriod = random(750);
+        game.bubbles.Add(Bubble(x_-1, y_+1));
       }
 #else 
       if (arduboy.pressed(LEFT_BUTTON)) {

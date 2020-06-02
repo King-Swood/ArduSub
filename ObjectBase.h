@@ -13,6 +13,15 @@ public:
     valid_(valid)
   {}
 
+  virtual void Reset()
+  {
+  x_ = 0;
+  y_ = 0;
+  vX_ = 0;
+  vY_ = 0;
+  valid_ = true;
+  }
+
   void Move(int x, int y)
   {
     x_ += x;

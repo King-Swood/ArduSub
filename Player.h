@@ -18,19 +18,6 @@ class Game;
 class Sub : public ObjectBase
 {
 public:
-//  Sub(const Sub&) = default;
-//  Sub(Game& game):
-//    game_(game)
-//  {}
-//  Sub(Game& game, int x, int y, bool valid = true):
-//    game_(game),
-//    ObjectBase(x,y,valid)
-//  {}
-//  Sub& operator=(Sub&& other)
-//  {
-//    Sub sub(other);
-//    return sub;
-//  }
   Sub() = default;
   Sub(int x, int y, bool valid = true):
     ObjectBase(x,y,valid)
@@ -58,7 +45,6 @@ public:
 #endif
   }
 private:
-//  Game& game_;
   long unsigned lastBubble = millis();
-  unsigned nextBubble = lastBubble + 333;
+  unsigned bubblePeriod = 333;
 };

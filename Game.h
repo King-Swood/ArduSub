@@ -55,7 +55,6 @@ public:
         
         if (millis() > nextMineTimeMS) {
           AddMine();
-          bubbles.Add(Bubble(20, 20));
           nextMineTimeMS = millis() + random(1000);
         }
         if (!sub.IsValid()) {

@@ -1,7 +1,5 @@
-#include <Arduboy2.h>
 #include "Globals.h"
-#include "Player.h"
-#include "Obstacle.h"
+#include "Game.h"
 
 Arduboy2 arduboy;
 
@@ -10,107 +8,6 @@ const Rect BoundRight(WIDTH, -1, WIDTH, HEIGHT);
 const Rect BoundTop(0, -HEIGHT, WIDTH, HEIGHT);
 const Rect BoundBottom(0, HEIGHT, WIDTH, HEIGHT);
 const Rect BoundScreen(0, 0, WIDTH, HEIGHT);
-
-enum class GameState {
-  Running,
-  Finished,
-  Size,
-};
-
-class Game {
-public:
-  Game() = default;
-  Sub sub;
-
-  ObjectManager<Mine, 20> mines;
-  
-  long unsigned originalTimeMS;
-  long unsigned nextMineTimeMS;
-  GameState state;
-  GameState lastState;
-
-  void Reset()
-  {
-    state = GameState::Running;
-    sub = Sub(0, 10);
-    for (Mine& mine : mines.items) {
-      mine = Mine();
-    }
-    originalTimeMS = millis();
-    nextMineTimeMS = millis() + random(1000);
-  
-  #if TEST_COLLISIONS
-    for (Mine& mine : game->mines) {
-      AddMine(true);
-    }
-  #endif
-  }
-  
-  void Update()
-  {
-    bool firstTime = (state != lastState);
-    lastState = state;
-  
-    switch (state) {
-      case GameState::Running:
-        sub.Update();
-        
-        mines.UpdateAll([](Mine& mine, Game* game)
-        {
-          if (game->sub.IsColliding(mine)) {
-            game->sub.Invalidate();
-          }
-        }, this);
-        
-        if (millis() > nextMineTimeMS) {
-          AddMine();
-          nextMineTimeMS = millis() + random(1000);
-        }
-        if (!sub.IsValid()) {
-          state = GameState::Finished;
-        }
-        break;
-      case GameState::Finished:
-        break;
-      case GameState::Size:
-        break;
-    }
-  }
-
-  void Draw()
-  {
-    switch (state) {
-      case GameState::Running:
-        sub.Draw();
-        mines.DrawAll();
-        break;
-      case GameState::Finished:
-        sub.Draw();
-        break;
-      case GameState::Size:
-        break;
-    }
-    arduboy.drawRect(0, 0, WIDTH, HEIGHT);
-  }
-
-  void AddMine(bool fixedPosition = false)
-  {
-    int radius = random(2, 5);
-    if (fixedPosition) {
-      mines.Add(Mine(random(1, (WIDTH-(radius << 1))),
-        random(1, (HEIGHT-(radius << 1))),
-        radius));
-    }
-    else {
-      int index = mines.Add(Mine(WIDTH-1,
-        random(0, (HEIGHT-(radius << 1))),
-        radius));
-      if (index >= 0) {
-      mines[index].SetVelocity(-1, 0);
-      }
-    }
-  }
-};
 
 struct Title {
   long unsigned lastTimeMS;
@@ -204,7 +101,7 @@ void loop() {
       break;
     case State::Game:
       if (firstTime) {
-        game.Reset();
+        game = Game();
       }
       game.Update();
       game.Draw();

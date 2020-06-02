@@ -13,13 +13,33 @@ const unsigned char PROGMEM SubSprite[] =
 0x10, 0x10, 0x30, 0x30, 0x38, 0x38, 0x30, 0x10, 
 };
 
+class Game;
+
 class Sub : public ObjectBase
 {
 public:
+//  Sub(const Sub&) = default;
+//  Sub(Game& game):
+//    game_(game)
+//  {}
+//  Sub(Game& game, int x, int y, bool valid = true):
+//    game_(game),
+//    ObjectBase(x,y,valid)
+//  {}
+//  Sub& operator=(Sub&& other)
+//  {
+//    Sub sub(other);
+//    return sub;
+//  }
   Sub() = default;
   Sub(int x, int y, bool valid = true):
     ObjectBase(x,y,valid)
   {}
+
+  void Reset()
+  {
+    valid_ = true;
+  }
 
   int Width() const override {return SubSprite[0];}
   int Height() const override {return SubSprite[1];}
@@ -29,42 +49,7 @@ public:
       return Rect(x_, y_+3, 8, 3);
   }
   
-  void Update() override
-  {
-    bool hitWall = false;
-    // Check in Y direction first
-    Rect tempRect = BoundingBox();
-    if (Arduboy2Base::collide(tempRect, BoundTop) || Arduboy2Base::collide(tempRect, BoundBottom)) {
-      hitWall = true;
-    }
-  
-    if (hitWall) {
-      Invalidate();
-    }
-    else {
-#if !TEST_COLLISIONS
-      if (arduboy.pressed(A_BUTTON) || arduboy.pressed(B_BUTTON)) {
-        y_ -= 1;
-      }
-      else {
-        y_ += 1;
-      }
-#else 
-      if (arduboy.pressed(LEFT_BUTTON)) {
-        x_ -= 1;
-      }
-      if (arduboy.pressed(RIGHT_BUTTON)) {
-        x_ += 1;
-      }
-      if (arduboy.pressed(UP_BUTTON)) {
-        y_ -= 1;
-      }
-      if (arduboy.pressed(DOWN_BUTTON)) {
-        y_ += 1;
-      }
-#endif
-    }
-  }
+  void Update() override;
   void Draw() override
   {
     Sprites::drawOverwrite(x_, y_, SubSprite, 0);
@@ -72,4 +57,8 @@ public:
     DrawBoundingBox();
 #endif
   }
+private:
+//  Game& game_;
+  long unsigned lastBubble = millis();
+  unsigned nextBubble = lastBubble + 333;
 };

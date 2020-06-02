@@ -19,6 +19,12 @@ public:
     y_ += y;
   }
 
+  void SetPosition(int x, int y)
+  {
+    x_ = x;
+    y_ = y;
+  }
+
   void SetVelocity(int x, int y)
   {
     vX_ = x;
@@ -81,6 +87,12 @@ public:
         count_++;
         return i;
       }
+    }
+  }
+  void ClearAll()
+  {
+    for (auto& item : items) {
+      item.Invalidate();
     }
   }
   void UpdateAll(void (*callback)(T&, void*) = nullptr, void *data = nullptr)

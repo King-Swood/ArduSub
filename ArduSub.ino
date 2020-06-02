@@ -21,9 +21,11 @@ class Game {
 public:
   Game() = default;
   Sub sub;
+  
   static const int MinesLength = 20;
   Mine mines[MinesLength];
   int minesCount;
+  
   long unsigned originalTimeMS;
   long unsigned nextMineTimeMS;
   GameState state;

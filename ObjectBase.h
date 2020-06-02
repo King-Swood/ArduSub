@@ -2,6 +2,7 @@
 #include "Globals.h"
 
 extern Arduboy2 arduboy;
+
 class ObjectBase
 {
 public:

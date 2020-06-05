@@ -45,7 +45,7 @@ public:
 
   virtual Rect BoundingBox() const
   {
-      return Rect(x_/10, y_/10, Width(), Height());
+      return Rect((x_/10), (y_/10), Width(), Height());
   }
 
   bool IsColliding(const ObjectBase& other)

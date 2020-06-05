@@ -14,8 +14,8 @@ public:
     SetVelocity(0, -5);
   }
 
-  int Width() const override {1;}
-  int Height() const override {1;}
+  int Width() const override {return 1;}
+  int Height() const override {return 1;}
   void Update() override
   {
     if (IsValid()) {

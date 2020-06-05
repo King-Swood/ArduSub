@@ -3,6 +3,7 @@
 
 Arduboy2 arduboy;
 
+// TODO: Work out how to statically initialise these and put them in PROGMEM
 const Rect BoundLeft(-WIDTH, -1, WIDTH, HEIGHT);
 const Rect BoundRight(WIDTH, -1, WIDTH, HEIGHT);
 const Rect BoundTop(0, -HEIGHT, WIDTH, HEIGHT);

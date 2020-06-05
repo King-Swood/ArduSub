@@ -17,17 +17,45 @@ extern Game game;
     }
     else {
 #if !TEST_COLLISIONS
+      static const int Momentum = 3;
+      static const int MaxLiftSpeed = 10;
+      static const int MaxSinkSpeed = 10;
+
+      bool diving = false;
       if (arduboy.pressed(A_BUTTON) || arduboy.pressed(B_BUTTON)) {
-        y_ -= 10;
+        vY_ += Momentum;
+        diving = true;
+        if (vY_ > MaxSinkSpeed) {
+          vY_ = MaxSinkSpeed;
+        }
+        else {
+          bubblePeriod >>= 2;
+        }
       }
       else {
-        y_ += 5;
+        vY_ -= Momentum;
+        if (vY_ < -MaxLiftSpeed) {
+          vY_ = -MaxLiftSpeed;
+        }
       }
+
+      y_ += vY_;
 
       if ((millis() - lastBubble) >= bubblePeriod) {
         lastBubble = millis();
-        bubblePeriod = random(750);
-        game.bubbles.Add(Bubble((x_/10)-1, (y_/10)+1));
+        bubblePeriod = random(500, 1000);
+        if (diving) {
+          // Add bubble on top of sub.
+          game.bubbles.Add(Bubble((x_/10)+1, (y_/10)+1));
+        }
+        else {
+          // Add bubble behind sub
+          game.bubbles.Add(Bubble((x_/10)-1, (y_/10)+1));
+        }
+      }
+      if ((millis() - lastMove) >= 100) {
+        lastMove = millis();
+        x_ += 1;
       }
 #else 
       if (arduboy.pressed(LEFT_BUTTON)) {

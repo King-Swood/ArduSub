@@ -4,6 +4,10 @@
 #include "Obstacle.h"
 #include "Particles.h"
 
+// TODO: Add timer to top of screen.
+// TODO: Add "Game over" screen, which shows time.
+// TODO: Add explosion animation when sub crashes.
+
 enum class GameState {
   Running,
   Finished,
@@ -13,7 +17,7 @@ enum class GameState {
 class Game {
 public:
   Game():
-    sub(10,10),
+    sub(5,26),
     mines(),
     bubbles(),
     originalTimeMS(millis()),
@@ -34,6 +38,8 @@ public:
   
   long unsigned originalTimeMS;
   long unsigned nextMineTimeMS;
+  long unsigned maxMineTimeMS = 3000;
+  static const long unsigned MinMineTimeMS = 800;
   GameState state;
   GameState lastState;
   
@@ -56,7 +62,11 @@ public:
         
         if (millis() > nextMineTimeMS) {
           AddMine();
-          nextMineTimeMS = millis() + random(1000);
+          nextMineTimeMS = millis() + random(maxMineTimeMS >> 1, maxMineTimeMS);
+          maxMineTimeMS -= 50;
+          if (maxMineTimeMS < MinMineTimeMS) {
+            maxMineTimeMS = MinMineTimeMS;
+          }
         }
         if (!sub.IsValid()) {
           state = GameState::Finished;

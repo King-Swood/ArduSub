@@ -2,6 +2,8 @@
 #include "Globals.h"
 #include "ObjectBase.h"
 
+// TODO: Perhaps levels increase when you get with X pixels of the right hand side of the screen...
+
 extern Arduboy2 arduboy;
 extern const Rect BoundTop;
 extern const Rect BoundBottom;
@@ -46,5 +48,6 @@ public:
   }
 private:
   long unsigned lastBubble = millis();
+  long unsigned lastMove = millis();
   unsigned bubblePeriod = 333;
 };

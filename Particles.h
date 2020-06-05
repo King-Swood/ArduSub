@@ -19,7 +19,8 @@ public:
   void Update() override
   {
     if (IsValid()) {
-      Move(vX_, vY_);
+      int xVariant = random(-1, 2);
+      Move(vX_ + xVariant, vY_);
       if (!Arduboy2Base::collide(BoundingBox(), BoundScreen)) {
         Invalidate();
       }

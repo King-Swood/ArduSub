@@ -38,8 +38,8 @@ void TitleUpdate(Title *title)
 void TitleDraw(Title *title)
 {
   arduboy.setTextSize(2);
-  arduboy.setCursor(30, 10);
-  arduboy.print("SUB");
+  arduboy.setCursor(10, 10);
+  arduboy.print("ARDUSUB");
   arduboy.setTextSize(1);
 
   if (!title->hidden) {
@@ -106,9 +106,9 @@ void loop() {
       }
       game.Update();
       game.Draw();
-//      if (game.state == GameState::Finished) {
-//        currentState = State::Title;
-//      }
+      if (game.state == GameState::Finished) {
+        currentState = State::Title;
+      }
       break;
     case State::Size:
       break;

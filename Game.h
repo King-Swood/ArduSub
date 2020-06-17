@@ -12,6 +12,7 @@ extern Arduboy2 arduboy;
 
 enum class GameState {
   Running,
+  GameOver,
   Finished,
   Size,
 };
@@ -22,7 +23,6 @@ public:
     sub(5,26),
     mines(),
     bubbles(),
-    gameTimeStartMS(millis()),
     originalTimeMS(millis()),
     nextMineTimeMS(millis() + random(1000)),
     state(GameState::Running),
@@ -39,7 +39,7 @@ public:
   ObjectManager<Mine, 20> mines;
   ObjectManager<Bubble, 20> bubbles;
   
-  long unsigned gameTimeStartMS;
+  long unsigned gameTimeStartMS = 0;
   long unsigned gameTimeEndMS = 0;
   long unsigned originalTimeMS;
   long unsigned nextMineTimeMS;
@@ -55,31 +55,19 @@ public:
   
     switch (state) {
       case GameState::Running:
-      case GameState::Finished:
-        sub.Update();
-        bubbles.UpdateAll();
-        
-        mines.UpdateAll([](Mine& mine, Game* game)
-        {
-          if (game->sub.IsColliding(mine)) {
-            game->sub.Invalidate();
-          }
-        }, this);
-        
-        if (millis() > nextMineTimeMS) {
-          AddMine();
-          nextMineTimeMS = millis() + random(maxMineTimeMS >> 1, maxMineTimeMS);
-          maxMineTimeMS -= 100;
-          if (maxMineTimeMS < MinMineTimeMS) {
-            maxMineTimeMS = MinMineTimeMS;
-          }
+        if (firstTime) {
+          gameTimeStartMS = millis();
         }
-
-        if (state == GameState::Running) {
-          if (!sub.IsValid()) {
-            state = GameState::Finished;
-            gameTimeEndMS = millis();
-          }
+        UpdateAll();
+        if (!sub.IsValid()) {
+          state = GameState::GameOver;
+          gameTimeEndMS = millis();
+        }
+        break;
+      case GameState::GameOver:
+        UpdateAll();
+        if (arduboy.justReleased(A_BUTTON) || arduboy.justReleased(B_BUTTON)) {
+          state = GameState::Finished;
         }
         break;
       case GameState::Size:
@@ -91,11 +79,11 @@ public:
   {
     switch (state) {
       case GameState::Running:
-      case GameState::Finished:
+      case GameState::GameOver:
         sub.Draw();
         mines.DrawAll();
         bubbles.DrawAll();
-        if (state == GameState::Finished) {
+        if (state == GameState::GameOver) {
           DrawGameOver((gameTimeEndMS - gameTimeStartMS) / 1000);
         }
         break;
@@ -140,6 +128,28 @@ public:
       if (index >= 0) {
         mines[index].SetVelocity(random(-15, -5), random(-3,4));
 //        mines[index].SetVelocity(-10, 0);
+      }
+    }
+  }
+private:
+  void UpdateAll()
+  {
+    sub.Update();
+    bubbles.UpdateAll();
+    
+    mines.UpdateAll([](Mine& mine, Game* game)
+    {
+      if (game->sub.IsColliding(mine)) {
+        game->sub.Invalidate();
+      }
+    }, this);
+    
+    if (millis() > nextMineTimeMS) {
+      AddMine();
+      nextMineTimeMS = millis() + random(maxMineTimeMS >> 1, maxMineTimeMS);
+      maxMineTimeMS -= 100;
+      if (maxMineTimeMS < MinMineTimeMS) {
+        maxMineTimeMS = MinMineTimeMS;
       }
     }
   }

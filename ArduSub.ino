@@ -106,9 +106,9 @@ void loop() {
       }
       game.Update();
       game.Draw();
-      if (game.state == GameState::Finished) {
-        currentState = State::Title;
-      }
+//      if (game.state == GameState::Finished) {
+//        currentState = State::Title;
+//      }
       break;
     case State::Size:
       break;

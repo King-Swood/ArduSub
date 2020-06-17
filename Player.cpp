@@ -15,7 +15,8 @@ extern Game game;
     if (hitWall) {
       Invalidate();
     }
-    else {
+    
+    if (valid_) {
 #if !TEST_COLLISIONS
       static const int Momentum = 3;
       static const int MaxLiftSpeed = 10;

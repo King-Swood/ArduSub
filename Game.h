@@ -11,6 +11,8 @@ extern Arduboy2 arduboy;
 // TODO: Add explosion animation when sub crashes.
 
 enum class GameState {
+  Initial,
+  Countdown,
   Running,
   GameOver,
   Finished,
@@ -25,7 +27,7 @@ public:
     bubbles(),
     originalTimeMS(millis()),
     nextMineTimeMS(millis() + random(1000)),
-    state(GameState::Running),
+    state(GameState::Initial),
     lastState(GameState::Size)
   {
   #if TEST_COLLISIONS
@@ -45,8 +47,17 @@ public:
   long unsigned nextMineTimeMS;
   long unsigned maxMineTimeMS = 3000;
   static const long unsigned MinMineTimeMS = 800;
+  static const long unsigned CountDownTimeMS = 2999;
+  static const long unsigned GoDisplayMS = 800;
   GameState state;
   GameState lastState;
+
+  // TODO: Add crash animation to sub (possibly it just disappears in a mass of bubbles.
+  // TODO: Make it so we can enable/disable player control for the sub.
+  //        This way we can call the subs update function as it moves onto the screen, and animate it/cause bubbles.
+  // TODO: It would be good to be able to update bubbles/mines in all states.
+  // TODO: Start adding audio.
+  // TODO: The Game over screen should have a minimum display time.
   
   void Update()
   {
@@ -54,6 +65,24 @@ public:
     lastState = state;
   
     switch (state) {
+      case GameState::Initial:
+        if (firstTime) {
+          sub.SetPosition(0 - sub.Width(), 40);
+        }
+        sub.Move(5, 0);
+        if (sub.X() >= 50) {
+          state = GameState::Countdown;
+        }
+        break;
+      case GameState::Countdown:
+        if (firstTime){
+          gameTimeStartMS = millis();
+        }
+        bubbles.UpdateAll();
+        if ((millis() - gameTimeStartMS) >= CountDownTimeMS) {
+          state = GameState::Running;
+        }
+        break;
       case GameState::Running:
         if (firstTime) {
           gameTimeStartMS = millis();
@@ -61,10 +90,12 @@ public:
         UpdateAll();
         if (!sub.IsValid()) {
           state = GameState::GameOver;
-          gameTimeEndMS = millis();
         }
         break;
       case GameState::GameOver:
+        if (firstTime) {
+          gameTimeEndMS = millis();
+        }
         UpdateAll();
         if (arduboy.justReleased(A_BUTTON) || arduboy.justReleased(B_BUTTON)) {
           state = GameState::Finished;
@@ -77,18 +108,23 @@ public:
 
   void Draw()
   {
-    switch (state) {
-      case GameState::Running:
-      case GameState::GameOver:
-        sub.Draw();
-        mines.DrawAll();
-        bubbles.DrawAll();
-        if (state == GameState::GameOver) {
-          DrawGameOver((gameTimeEndMS - gameTimeStartMS) / 1000);
-        }
-        break;
-      case GameState::Size:
-        break;
+    // We use lastState here to draw, because otherwise the actual state may have changed but we haven't initialised the new state yet.
+    // This way, we are always drawing a scene which is valid.
+    sub.Draw();
+    mines.DrawAll();
+    bubbles.DrawAll();
+    if (lastState == GameState::Countdown) {
+      long unsigned countdown = millis() - gameTimeStartMS;
+      if (countdown > CountDownTimeMS) {
+        countdown = CountDownTimeMS;
+      }
+      DrawCountdown(((CountDownTimeMS - countdown) / 1000) + 1);
+    }
+    else if ((lastState == GameState::Running) && ((millis() - gameTimeStartMS) < GoDisplayMS)) {
+      DrawCountdown(0);
+    }
+    else if (lastState == GameState::GameOver) {
+      DrawGameOver((gameTimeEndMS - gameTimeStartMS) / 1000);
     }
     arduboy.drawRect(0, 0, WIDTH, HEIGHT);
   }
@@ -111,6 +147,21 @@ public:
     }
     arduboy.print(gameTimeS);
     arduboy.print("s");
+  }
+
+  static void DrawCountdown(long unsigned timeLeftS)
+  {
+    static const int Width = 10;
+    static const int Height = 10;
+    static const int TopLeftX = (WIDTH >> 1) - (Width >> 1);
+    static const int TopLeftY = (HEIGHT >> 1) - (Height >> 1);
+    arduboy.setCursor(TopLeftX,TopLeftY);
+    if (timeLeftS > 0) {
+      arduboy.print(timeLeftS);
+    }
+    else {
+      arduboy.print("GO");
+    }
   }
 
   void AddMine(bool fixedPosition = false)

@@ -37,6 +37,16 @@ public:
     y_ = y*10;
   }
 
+  int X() const
+  {
+    return x_;
+  }
+
+  int Y() const
+  {
+    return y_;
+  }
+
   void SetVelocity(int x, int y)
   {
     vX_ = x;

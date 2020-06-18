@@ -25,7 +25,6 @@ public:
     sub(5,26),
     mines(),
     bubbles(),
-    originalTimeMS(millis()),
     nextMineTimeMS(millis() + random(1000)),
     state(GameState::Initial),
     lastState(GameState::Size)
@@ -43,12 +42,12 @@ public:
   
   long unsigned gameTimeStartMS = 0;
   long unsigned gameTimeEndMS = 0;
-  long unsigned originalTimeMS;
   long unsigned nextMineTimeMS;
   long unsigned maxMineTimeMS = 3000;
   static const long unsigned MinMineTimeMS = 800;
   static const long unsigned CountDownTimeMS = 2999;
   static const long unsigned GoDisplayMS = 800;
+  static const long unsigned GameOverMinMS = 2000;
   GameState state;
   GameState lastState;
 
@@ -57,7 +56,6 @@ public:
   //        This way we can call the subs update function as it moves onto the screen, and animate it/cause bubbles.
   // TODO: It would be good to be able to update bubbles/mines in all states.
   // TODO: Start adding audio.
-  // TODO: The Game over screen should have a minimum display time.
   
   void Update()
   {
@@ -97,9 +95,14 @@ public:
           gameTimeEndMS = millis();
         }
         UpdateAll();
-        if (arduboy.justReleased(A_BUTTON) || arduboy.justReleased(B_BUTTON)) {
-          state = GameState::Finished;
+        if ((millis() - gameTimeEndMS) >= GameOverMinMS) {
+          if (arduboy.justPressed(A_BUTTON) || arduboy.justPressed(B_BUTTON)) {
+            state = GameState::Finished;
+          }
         }
+        break;
+      case GameState::Finished:
+        UpdateAll();
         break;
       case GameState::Size:
         break;
@@ -113,19 +116,29 @@ public:
     sub.Draw();
     mines.DrawAll();
     bubbles.DrawAll();
-    if (lastState == GameState::Countdown) {
-      long unsigned countdown = millis() - gameTimeStartMS;
-      if (countdown > CountDownTimeMS) {
-        countdown = CountDownTimeMS;
+
+    switch (lastState) {
+      case GameState::Countdown: {
+        long unsigned countdown = millis() - gameTimeStartMS;
+        if (countdown > CountDownTimeMS) {
+          countdown = CountDownTimeMS;
+        }
+        DrawCountdown(((CountDownTimeMS - countdown) / 1000) + 1);
+        break;
       }
-      DrawCountdown(((CountDownTimeMS - countdown) / 1000) + 1);
+      case GameState::Running: {
+        if ((millis() - gameTimeStartMS) < GoDisplayMS) {
+          DrawCountdown(0);
+        }
+        break;
+      }
+      case GameState::GameOver:
+      case GameState::Finished: {
+        DrawGameOver((gameTimeEndMS - gameTimeStartMS) / 1000);
+        break;
+      }
     }
-    else if ((lastState == GameState::Running) && ((millis() - gameTimeStartMS) < GoDisplayMS)) {
-      DrawCountdown(0);
-    }
-    else if (lastState == GameState::GameOver) {
-      DrawGameOver((gameTimeEndMS - gameTimeStartMS) / 1000);
-    }
+
     arduboy.drawRect(0, 0, WIDTH, HEIGHT);
   }
 

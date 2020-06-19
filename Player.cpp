@@ -30,7 +30,7 @@ extern Game game;
           vY_ = MaxSinkSpeed;
         }
         else {
-          bubblePeriod >>= 2;
+          bubblePeriod >>= 1;
         }
       }
       else {
@@ -72,5 +72,16 @@ extern Game game;
         y_ += 5;
       }
 #endif
+    }
+    else {
+      if (!Arduboy2Base::collide(tempRect, BoundBottom)) {
+        y_ += 3;
+        bubblePeriod >>= 1;
+      }
+      if ((millis() - lastBubble) >= bubblePeriod) {
+        lastBubble = millis();
+        bubblePeriod = random(300, 800);
+        game.bubbles.Add(Bubble((x_/10) + random(0, 8), (y_/10) + random(0, 2)));
+      }
     }
   }

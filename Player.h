@@ -2,8 +2,6 @@
 #include "Globals.h"
 #include "ObjectBase.h"
 
-// TODO: Perhaps levels increase when you get with X pixels of the right hand side of the screen...
-
 extern Arduboy2 arduboy;
 extern const Rect BoundTop;
 extern const Rect BoundBottom;
@@ -12,7 +10,8 @@ const unsigned char PROGMEM SubSprite[] =
 {
 // width, height,
 8, 8,
-0x10, 0x10, 0x30, 0x30, 0x38, 0x38, 0x30, 0x10, 
+0x10, 0x10, 0x30, 0x30, 0x38, 0x38, 0x30, 0x10,
+0x10, 0x10, 0x18, 0x18, 0x38, 0x38, 0x18, 0x10, 
 };
 
 class Game;
@@ -41,7 +40,12 @@ public:
   void Update() override;
   void Draw() override
   {
-    Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 0);
+    if (valid_) {
+      Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 0);
+    }
+    else {
+      Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 1);
+    }
 #if TEST_COLLISIONS
     DrawBoundingBox();
 #endif

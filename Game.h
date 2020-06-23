@@ -8,8 +8,11 @@
 extern Arduboy2 arduboy;
 
 // TODO: Add timer to top of screen.
-// TODO: Add "Game over" screen, which shows time.
-// TODO: Add explosion animation when sub crashes.
+// TODO: Make it so we can enable/disable player control for the sub.
+//        This way we can call the subs update function as it moves onto the screen, and animate it/cause bubbles.
+// TODO: It would be good to be able to update bubbles/mines in all states, so bubbles come off the sub as it enters the screen.
+// TODO: Start adding audio.
+// TODO: Handle the case where the player reaches the edge of the screen.
 
 enum class GameState {
   Initial,
@@ -43,11 +46,6 @@ public:
   static const long unsigned GameOverMinMS = 2000;
   GameState state = GameState::Initial;
   GameState lastState = GameState::Size;
-
-  // TODO: Make it so we can enable/disable player control for the sub.
-  //        This way we can call the subs update function as it moves onto the screen, and animate it/cause bubbles.
-  // TODO: It would be good to be able to update bubbles/mines in all states.
-  // TODO: Start adding audio.
   
   void Update()
   {

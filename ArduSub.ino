@@ -1,5 +1,6 @@
 #include "Globals.h"
 #include "Game.h"
+#include "HiScore.h"
 
 Arduboy2 arduboy;
 
@@ -12,6 +13,7 @@ const Rect BoundScreen(0, 0, WIDTH, HEIGHT);
 
 struct Title {
   long unsigned lastTimeMS;
+  long unsigned screenTimeoutMS;
   bool hidden;
   bool startGame;
 };
@@ -19,6 +21,7 @@ struct Title {
 void TitleInit(struct Title *title)
 {
   title->lastTimeMS = millis();
+  title->screenTimeoutMS = millis();
   title->hidden = false; 
   title->startGame = false;
 }
@@ -51,7 +54,8 @@ void TitleDraw(Title *title)
 enum class State {
   Title,
   Game,
-  Size,
+  HiScores,
+  Size
 };
 State currentState;
 State lastState;
@@ -99,6 +103,9 @@ void loop() {
       if (title.startGame) {
         currentState = State::Game;
       }
+      else if ((millis() - title.screenTimeoutMS) > 5000) {
+        currentState = State::HiScores;
+      }
       break;
     case State::Game:
       if (firstTime) {
@@ -107,6 +114,18 @@ void loop() {
       game.Update();
       game.Draw();
       if (game.state == GameState::Finished) {
+        currentState = State::HiScores;
+      }
+      break;
+    case State::HiScores:
+      if (firstTime) {
+        title.screenTimeoutMS = millis();
+      }
+      HiScores::DrawHallOfFame(arduboy);
+      if ((millis() - title.screenTimeoutMS) > 5000) {
+        currentState = State::Title;
+      }
+      if (arduboy.justPressed(A_BUTTON) || arduboy.justPressed(B_BUTTON)) {
         currentState = State::Title;
       }
       break;

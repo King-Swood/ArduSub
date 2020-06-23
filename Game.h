@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "Obstacle.h"
 #include "Particles.h"
+#include "Title.h"
 
 extern Arduboy2 arduboy;
 
@@ -12,30 +13,22 @@ extern Arduboy2 arduboy;
 
 enum class GameState {
   Initial,
+  Menu = Initial,
+  GameStart,
   Countdown,
   Running,
   GameOver,
-  Finished,
   Size,
 };
 
 class Game {
 public:
-  Game():
-    sub(5,26),
-    mines(),
-    bubbles(),
-    nextMineTimeMS(millis() + random(1000)),
-    state(GameState::Initial),
-    lastState(GameState::Size)
+  Game()
   {
-  #if TEST_COLLISIONS
-    for (int i = 0; i < mines.Size(); i++) {
-      AddMine(true);
-    }
-  #endif
+    Reset();
   }
     
+  Title title_;
   Sub sub;
   ObjectManager<Mine, 20> mines;
   ObjectManager<Bubble, 20> bubbles;
@@ -48,10 +41,9 @@ public:
   static const long unsigned CountDownTimeMS = 2999;
   static const long unsigned GoDisplayMS = 800;
   static const long unsigned GameOverMinMS = 2000;
-  GameState state;
-  GameState lastState;
+  GameState state = GameState::Initial;
+  GameState lastState = GameState::Size;
 
-  // TODO: Add crash animation to sub (possibly it just disappears in a mass of bubbles.
   // TODO: Make it so we can enable/disable player control for the sub.
   //        This way we can call the subs update function as it moves onto the screen, and animate it/cause bubbles.
   // TODO: It would be good to be able to update bubbles/mines in all states.
@@ -60,11 +52,25 @@ public:
   void Update()
   {
     bool firstTime = (state != lastState);
+    bool showHiScores = (lastState == GameState::GameOver);
     lastState = state;
   
     switch (state) {
-      case GameState::Initial:
+      case GameState::Menu:
         if (firstTime) {
+          title_ = Title();
+          if (showHiScores) {
+            title_.DisplayHiScores();
+          }
+        }
+        title_.Update();
+        if (title_.IsPlayingGame()) {
+          state = GameState::GameStart;
+        }
+        break;
+      case GameState::GameStart:
+        if (firstTime) {
+          Reset();
           sub.SetPosition(0 - sub.Width(), 40);
         }
         sub.Move(5, 0);
@@ -97,12 +103,9 @@ public:
         UpdateAll();
         if ((millis() - gameTimeEndMS) >= GameOverMinMS) {
           if (arduboy.justPressed(A_BUTTON) || arduboy.justPressed(B_BUTTON)) {
-            state = GameState::Finished;
+            state = GameState::Initial;
           }
         }
-        break;
-      case GameState::Finished:
-        UpdateAll();
         break;
       case GameState::Size:
         break;
@@ -111,6 +114,10 @@ public:
 
   void Draw()
   {
+    if ((state == GameState::Menu) || (lastState == GameState::Menu)) {
+      return;
+    }
+    // TODO: Not sure if we should continue doing this or not...
     // We use lastState here to draw, because otherwise the actual state may have changed but we haven't initialised the new state yet.
     // This way, we are always drawing a scene which is valid.
     sub.Draw();
@@ -132,8 +139,7 @@ public:
         }
         break;
       }
-      case GameState::GameOver:
-      case GameState::Finished: {
+      case GameState::GameOver: {
         DrawGameOver((gameTimeEndMS - gameTimeStartMS) / 1000);
         break;
       }
@@ -216,5 +222,22 @@ private:
         maxMineTimeMS = MinMineTimeMS;
       }
     }
+  }
+
+  void Reset()
+  {
+    sub = Sub(-100,-100);
+    mines.ClearAll();
+    bubbles.ClearAll();
+    gameTimeStartMS = 0;
+    gameTimeEndMS = 0;
+    nextMineTimeMS = (millis() + random(1000));
+    maxMineTimeMS = 3000;
+
+  #if TEST_COLLISIONS
+    for (int i = 0; i < mines.Size(); i++) {
+      AddMine(true);
+    }
+  #endif
   }
 };

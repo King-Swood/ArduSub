@@ -1,4 +1,5 @@
 #include "Globals.h"
+#include "Title.h"
 #include "Game.h"
 #include "HiScore.h"
 
@@ -11,55 +12,6 @@ const Rect BoundTop(0, -HEIGHT, WIDTH, HEIGHT);
 const Rect BoundBottom(0, HEIGHT, WIDTH, HEIGHT);
 const Rect BoundScreen(0, 0, WIDTH, HEIGHT);
 
-struct Title {
-  long unsigned lastTimeMS;
-  long unsigned screenTimeoutMS;
-  bool hidden;
-  bool startGame;
-};
-
-void TitleInit(struct Title *title)
-{
-  title->lastTimeMS = millis();
-  title->screenTimeoutMS = millis();
-  title->hidden = false; 
-  title->startGame = false;
-}
-
-void TitleUpdate(Title *title)
-{
-  if (arduboy.justPressed(A_BUTTON) || arduboy.justPressed(B_BUTTON)) {
-    title->startGame = true;
-  }
-  
-  if ((millis() - title->lastTimeMS) > 500) {
-    title->lastTimeMS = millis();
-    title->hidden = !title->hidden;
-  }
-}
-
-void TitleDraw(Title *title)
-{
-  arduboy.setTextSize(2);
-  arduboy.setCursor(10, 10);
-  arduboy.print("ARDUSUB");
-  arduboy.setTextSize(1);
-
-  if (!title->hidden) {
-    arduboy.setCursor(10,35);
-    arduboy.print("A or B to Start");
-  }
-}
-
-enum class State {
-  Title,
-  Game,
-  HiScores,
-  Size
-};
-State currentState;
-State lastState;
-Title title;
 Game game;
 
 void setup() {
@@ -73,9 +25,7 @@ void setup() {
 #else
   arduboy.setFrameRate(30);
 #endif
-  
-  currentState = State::Title;
-  lastState = State::Size;
+ 
   randomSeed(analogRead(0));
 }
 
@@ -86,52 +36,12 @@ void loop() {
   }
 
   arduboy.pollButtons();
-
-  bool firstTime = (currentState != lastState);
-  lastState = currentState;
   
   // first we clear our screen to black
   arduboy.clear();
 
-  switch (currentState) {
-    case State::Title:
-      if (firstTime) {
-        TitleInit(&title);
-      }
-      TitleUpdate(&title);
-      TitleDraw(&title);
-      if (title.startGame) {
-        currentState = State::Game;
-      }
-      else if ((millis() - title.screenTimeoutMS) > 5000) {
-        currentState = State::HiScores;
-      }
-      break;
-    case State::Game:
-      if (firstTime) {
-        game = Game();
-      }
-      game.Update();
-      game.Draw();
-      if (game.state == GameState::Finished) {
-        currentState = State::HiScores;
-      }
-      break;
-    case State::HiScores:
-      if (firstTime) {
-        title.screenTimeoutMS = millis();
-      }
-      HiScores::DrawHallOfFame(arduboy);
-      if ((millis() - title.screenTimeoutMS) > 5000) {
-        currentState = State::Title;
-      }
-      if (arduboy.justPressed(A_BUTTON) || arduboy.justPressed(B_BUTTON)) {
-        currentState = State::Title;
-      }
-      break;
-    case State::Size:
-      break;
-  }
+  game.Update();
+  game.Draw();
 
   arduboy.display();
 }

@@ -116,6 +116,7 @@ public:
     for (auto& item : items) {
       item.Invalidate();
     }
+    count_ = 0;
   }
   void UpdateAll(void (*callback)(T&, void*) = nullptr, void *data = nullptr)
   {

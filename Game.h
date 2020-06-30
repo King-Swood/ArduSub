@@ -72,6 +72,8 @@ public:
           sub.SetPosition(0 - sub.Width(), 40);
         }
         sub.Move(5, 0);
+        sub.UpdateBubbles(false, false);
+        bubbles.UpdateAll();
         if (sub.X() >= 50) {
           state = GameState::Countdown;
         }
@@ -80,6 +82,7 @@ public:
         if (firstTime){
           gameTimeStartMS = millis();
         }
+        sub.UpdateBubbles(false, false);
         bubbles.UpdateAll();
         if ((millis() - gameTimeStartMS) >= CountDownTimeMS) {
           state = GameState::Running;

@@ -38,18 +38,8 @@ public:
   }
   
   void Update() override;
-  void Draw() override
-  {
-    if (valid_) {
-      Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 0);
-    }
-    else {
-      Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 1);
-    }
-#if TEST_COLLISIONS
-    DrawBoundingBox();
-#endif
-  }
+  void Draw() override;
+  void UpdateBubbles(bool diving, bool crashed);
 private:
   long unsigned lastBubble = millis();
   long unsigned lastMove = millis();

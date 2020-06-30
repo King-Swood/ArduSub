@@ -6,8 +6,6 @@
 Arduboy2 arduboy;
 
 // TODO: Work out how to statically initialise these and put them in PROGMEM
-const Rect BoundLeft(-WIDTH, -1, WIDTH, HEIGHT);
-const Rect BoundRight(WIDTH, -1, WIDTH, HEIGHT);
 const Rect BoundTop(0, -HEIGHT, WIDTH, HEIGHT);
 const Rect BoundBottom(0, HEIGHT, WIDTH, HEIGHT);
 const Rect BoundScreen(0, 0, WIDTH, HEIGHT);
@@ -18,12 +16,10 @@ void setup() {
   Serial.begin(9600);
   arduboy.begin();
 
-  // here we set the framerate to 15, we do not need to run at
-  // default 60 and it saves us battery life
 #if TEST_COLLISIONS
   arduboy.setFrameRate(5);
 #else
-  arduboy.setFrameRate(30);
+  arduboy.setFrameRate(60);
 #endif
  
   randomSeed(analogRead(0));

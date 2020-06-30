@@ -3,22 +3,17 @@
 
 extern Game game;
 
-void Sub::Update()
-{
-  bool hitWall = false;
-  // Check in Y direction first
-  Rect tempRect = BoundingBox();
-  if (Arduboy2Base::collide(tempRect, BoundTop) || Arduboy2Base::collide(tempRect, BoundBottom)) {
-    hitWall = true;
-  }
+const Rect BoundLeft(-WIDTH, -1, WIDTH+5, HEIGHT);
+const Rect BoundRight(WIDTH-5, -1, WIDTH, HEIGHT);
 
-  if (hitWall) {
-    Invalidate();
-  }
-  
+void Sub::Update()
+{  
+  Rect tempRect = BoundingBox();
+
   if (valid_) {
 #if !TEST_COLLISIONS
     static const int Momentum = 3;
+    static const int MomentumX = 1;
     static const int MaxLiftSpeed = 10;
     static const int MaxSinkSpeed = 10;
 
@@ -43,9 +38,19 @@ void Sub::Update()
     y_ += vY_;
 
     UpdateBubbles(diving, false);
-    if ((millis() - lastMove) >= 100) {
+    if ((millis() - lastMove) >= 10) {
       lastMove = millis();
-      x_ += 1;
+      x_ += vX_;
+      
+      if (Arduboy2Base::collide(tempRect, BoundRight) || Arduboy2Base::collide(tempRect, BoundLeft)) {
+        if (vX_ >= 0) {
+          x_ -= 10;
+        }
+        else {
+          x_ += 10;
+        }
+        vX_ = -vX_;
+      }
     }
 #else 
     if (arduboy.pressed(LEFT_BUTTON)) {
@@ -73,16 +78,17 @@ void Sub::Update()
 void Sub::Draw()
 {
   if (valid_) {
-    Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 0);
+    vX_ >= 0 ? Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 0) : Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 1);
   }
   else {
-    Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 1);
+    vX_ >= 0 ? Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 2) : Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 3);
   }
 #if TEST_COLLISIONS
   DrawBoundingBox();
 #endif
 }
 
+// TODO: Need to fix bubbles so that when its travelling in the reverse direction they get added to the correct place.
 void Sub::UpdateBubbles(bool diving, bool crashed)
 {
   if ((millis() - lastBubble) >= bubblePeriod) {

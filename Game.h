@@ -91,6 +91,7 @@ public:
       case GameState::Running:
         if (firstTime) {
           gameTimeStartMS = millis();
+          sub.SetVelocity(1, 0);
         }
         UpdateAll();
         if (!sub.IsValid()) {
@@ -214,6 +215,11 @@ private:
         game->sub.Invalidate();
       }
     }, this);
+    
+    Rect tempRect = sub.BoundingBox();
+    if (Arduboy2Base::collide(tempRect, BoundTop) || Arduboy2Base::collide(tempRect, BoundBottom)) {
+        sub.Invalidate();
+    }
     
     if (millis() > nextMineTimeMS) {
       AddMine();

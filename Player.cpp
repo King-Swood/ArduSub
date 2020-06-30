@@ -38,7 +38,7 @@ void Sub::Update()
     y_ += vY_;
 
     UpdateBubbles(diving, false);
-    if ((millis() - lastMove) >= 10) {
+    if ((millis() - lastMove) >= 100) {
       lastMove = millis();
       x_ += vX_;
       

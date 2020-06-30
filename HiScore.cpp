@@ -7,7 +7,7 @@ PROGMEM static const HiScore HiScores::Records[] =
 {
   {"Darren Pearce", 84},
   {"Johnny Dixon", 57},
-  {"Sarah Pearce", 42},
+  {"Sarah Pearce", 57},
   {"Bill Sinno", 32},
 };
 

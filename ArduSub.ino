@@ -19,7 +19,7 @@ void setup() {
 #if TEST_COLLISIONS
   arduboy.setFrameRate(5);
 #else
-  arduboy.setFrameRate(60);
+  arduboy.setFrameRate(30);
 #endif
  
   randomSeed(analogRead(0));

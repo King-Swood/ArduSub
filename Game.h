@@ -13,7 +13,6 @@ extern ArduboyPlaytune tones;
 // TODO: Add timer to top of screen.
 // TODO: Make it so we can enable/disable player control for the sub.
 //        This way we can call the subs update function as it moves onto the screen, and animate it/cause bubbles.
-// TODO: Start adding audio.
 // TODO: We could perhaps save some RAM by removing the velocity from ObjectBase.
 //        This is because bubbles don't need a modifiable velocity they all rise at the same rate.
 //        We could instead have an intermediate class that has a velocity in it, thats used by mines and the player.
@@ -29,6 +28,9 @@ enum class GameState {
 };
 
 // TODO: Consider moving the audio stuff into another file.
+// TODO: Add a slight pause to the end of the crash.
+// TODO: Make it so that if the crash tone is played, it doesn't override the crash tone if it was already playing.
+// TODO: Add a "blub-blub" sound effect when diving, or when falling to the floor. Or when a bubble is produced.
 
 // The score is played on channel 0 (start: 0x90, stop: 0x80)
 const byte score[] PROGMEM = {0x90,83, 0,75, 0x80, 0x90,88, 0,225, 0x80, 0xf0};
@@ -184,8 +186,10 @@ private:
     {
       if (game->sub.IsColliding(mine)) {
 #if !DISABLE_PLAYER_COLLISION
-        game->sub.Invalidate();
-        music.playScore(Crash);
+        if (!onFloor) {
+          game->sub.Invalidate();
+          music.playScore(Crash);
+        }
 #endif
       }
     }, this);

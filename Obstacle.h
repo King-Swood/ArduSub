@@ -40,5 +40,5 @@ public:
 #endif
   }
 private:
-  int radius_;
+  uint8_t radius_;
 };

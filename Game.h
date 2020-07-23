@@ -14,6 +14,9 @@ extern ArduboyPlaytune tones;
 // TODO: Make it so we can enable/disable player control for the sub.
 //        This way we can call the subs update function as it moves onto the screen, and animate it/cause bubbles.
 // TODO: Start adding audio.
+// TODO: We could perhaps save some RAM by removing the velocity from ObjectBase.
+//        This is because bubbles don't need a modifiable velocity they all rise at the same rate.
+//        We could instead have an intermediate class that has a velocity in it, thats used by mines and the player.
 
 enum class GameState {
   Initial,

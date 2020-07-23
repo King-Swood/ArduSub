@@ -24,11 +24,14 @@ public:
   Sub() = default;
   Sub(int x, int y, bool valid = true):
     ObjectBase(x,y,valid)
-  {}
+  {
+    Reset();
+  }
 
   void Reset()
   {
     valid_ = true;
+    movingRight = true;
   }
 
   int Width() const override {return SubSprite[0];}
@@ -46,5 +49,5 @@ private:
   long unsigned lastBubble = millis();
   long unsigned lastMove = millis();
   unsigned bubblePeriod = 333;
-  bool movingRight = true;
+  bool movingRight :1;
 };

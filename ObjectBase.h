@@ -73,8 +73,8 @@ public:
 protected:
   int x_ = 0;
   int y_ = 0;
-  int vX_ = 0;
-  int vY_ = 0;
+  int8_t vX_ = 0;
+  int8_t vY_ = 0;
   bool valid_ :1;
 
   void DrawBoundingBox()

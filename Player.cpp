@@ -102,17 +102,17 @@ void Sub::UpdateBubbles(bool diving, bool crashed)
 
     if (crashed) {
       bubblePeriod = random(300, 800);
-      game.bubbles.Add(Bubble((x_/10) + random(0, Width()), (y_/10) + random(0, Height())));
+      game.AddBubble(Bubble((x_/10) + random(0, Width()), (y_/10) + random(0, Height())));
     }
     else {
       bubblePeriod = random(500, 1000);
       if (diving) {
         // Add bubble on top of sub.
-        movingRight ? game.bubbles.Add(Bubble((x_/10)+1, (y_/10)+1)) : game.bubbles.Add(Bubble((x_/10)+Width()-2, (y_/10)+1));
+        movingRight ? game.AddBubble(Bubble((x_/10)+1, (y_/10)+1)) : game.AddBubble(Bubble((x_/10)+Width()-2, (y_/10)+1));
       }
       else {
         // Add bubble behind sub
-        movingRight ? game.bubbles.Add(Bubble((x_/10)-1, (y_/10)+1)) : game.bubbles.Add(Bubble((x_/10)+Width(), (y_/10)+1));
+        movingRight ? game.AddBubble(Bubble((x_/10)-1, (y_/10)+1)) : game.AddBubble(Bubble((x_/10)+Width(), (y_/10)+1));
       }
     }
   }

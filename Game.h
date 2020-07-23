@@ -4,8 +4,11 @@
 #include "Obstacle.h"
 #include "Particles.h"
 #include "Title.h"
+#include <ArduboyPlaytune.h>
 
 extern Arduboy2 arduboy;
+extern ArduboyPlaytune music;
+extern ArduboyPlaytune tones;
 
 // TODO: Add timer to top of screen.
 // TODO: Make it so we can enable/disable player control for the sub.
@@ -22,28 +25,32 @@ enum class GameState {
   Size,
 };
 
+// TODO: Consider moving the audio stuff into another file.
+
+// The score is played on channel 0 (start: 0x90, stop: 0x80)
+const byte score[] PROGMEM = {0x90,83, 0,75, 0x80, 0x90,88, 0,225, 0x80, 0xf0};
+// Other notes must be played on channel 1 (start: 0x91, stop: 0x81)
+const byte Crash[] PROGMEM = {
+  0x91,80,0,50,0x81,
+  0x91,90,0,50,0x81,
+  0x91,80,0,50,0x81,
+  0x91,60,0,50,0x81,
+  0x91,70,0,50,0x81,
+  0xf0
+};
+
 class Game {
 public:
   Game()
   {
+    music.playScore(score);
     Reset();
   }
-    
-  Title title_;
-  Sub sub;
-  ObjectManager<Mine, 20> mines;
-  ObjectManager<Bubble, 20> bubbles;
-  
-  long unsigned gameTimeStartMS = 0;
-  long unsigned gameTimeEndMS = 0;
-  long unsigned nextMineTimeMS;
-  long unsigned maxMineTimeMS = 3000;
-  static const long unsigned MinMineTimeMS = 800;
-  static const long unsigned CountDownTimeMS = 2999;
-  static const long unsigned GoDisplayMS = 800;
-  static const long unsigned GameOverMinMS = 2000;
-  GameState state = GameState::Initial;
-  GameState lastState = GameState::Size;
+
+  void AddBubble(const Bubble &bubble)
+  {
+    bubbles.Add(bubble);
+  }
   
   void Update()
   {
@@ -147,6 +154,83 @@ public:
 
     arduboy.drawRect(0, 0, WIDTH, HEIGHT);
   }
+private:
+  Title title_;
+  Sub sub;
+  ObjectManager<Mine, 20> mines;
+  ObjectManager<Bubble, 20> bubbles;
+  bool onFloor :1;
+  
+  long unsigned gameTimeStartMS = 0;
+  long unsigned gameTimeEndMS = 0;
+  long unsigned nextMineTimeMS;
+  long unsigned maxMineTimeMS = 3000;
+  static const long unsigned MinMineTimeMS = 800;
+  static const long unsigned CountDownTimeMS = 2999;
+  static const long unsigned GoDisplayMS = 800;
+  static const long unsigned GameOverMinMS = 2000;
+  GameState state = GameState::Initial;
+  GameState lastState = GameState::Size;
+  
+  void UpdateAll()
+  {
+    sub.Update();
+    bubbles.UpdateAll();
+    
+    mines.UpdateAll([](Mine& mine, Game* game)
+    {
+      if (game->sub.IsColliding(mine)) {
+#if !DISABLE_PLAYER_COLLISION
+        game->sub.Invalidate();
+        music.playScore(Crash);
+#endif
+      }
+    }, this);
+    
+    Rect tempRect = sub.BoundingBox();
+    if (Arduboy2Base::collide(tempRect, BoundTop)) {
+#if !DISABLE_PLAYER_COLLISION
+      sub.Invalidate();
+      music.playScore(Crash);
+#endif
+    }
+    else if (Arduboy2Base::collide(tempRect, BoundBottom)) {
+#if !DISABLE_PLAYER_COLLISION
+      if (!onFloor) {
+        onFloor = true;
+        sub.Invalidate();
+        music.playScore(Crash);
+      }
+#endif
+    }
+    
+    if (millis() > nextMineTimeMS) {
+      AddMine();
+      nextMineTimeMS = millis() + random(maxMineTimeMS >> 1, maxMineTimeMS);
+      maxMineTimeMS -= 100;
+      if (maxMineTimeMS < MinMineTimeMS) {
+        maxMineTimeMS = MinMineTimeMS;
+      }
+    }
+  }
+
+  void Reset()
+  {
+    sub = Sub(-100,-100);
+    mines.ClearAll();
+    bubbles.ClearAll();
+    gameTimeStartMS = 0;
+    gameTimeEndMS = 0;
+    nextMineTimeMS = (millis() + random(1000));
+    maxMineTimeMS = 3000;
+    onFloor = false;
+
+  #if TEST_COLLISIONS
+    for (int i = 0; i < mines.Size(); i++) {
+      AddMine(true);
+    }
+  #endif
+  }
 
   static void DrawGameOver(long unsigned gameTimeS)
   {
@@ -200,53 +284,5 @@ public:
 //        mines[index].SetVelocity(-10, 0);
       }
     }
-  }
-private:
-  void UpdateAll()
-  {
-    sub.Update();
-    bubbles.UpdateAll();
-    
-    mines.UpdateAll([](Mine& mine, Game* game)
-    {
-      if (game->sub.IsColliding(mine)) {
-#if !DISABLE_PLAYER_COLLISION
-        game->sub.Invalidate();
-#endif
-      }
-    }, this);
-    
-    Rect tempRect = sub.BoundingBox();
-    if (Arduboy2Base::collide(tempRect, BoundTop) || Arduboy2Base::collide(tempRect, BoundBottom)) {
-#if !DISABLE_PLAYER_COLLISION
-        sub.Invalidate();
-#endif
-    }
-    
-    if (millis() > nextMineTimeMS) {
-      AddMine();
-      nextMineTimeMS = millis() + random(maxMineTimeMS >> 1, maxMineTimeMS);
-      maxMineTimeMS -= 100;
-      if (maxMineTimeMS < MinMineTimeMS) {
-        maxMineTimeMS = MinMineTimeMS;
-      }
-    }
-  }
-
-  void Reset()
-  {
-    sub = Sub(-100,-100);
-    mines.ClearAll();
-    bubbles.ClearAll();
-    gameTimeStartMS = 0;
-    gameTimeEndMS = 0;
-    nextMineTimeMS = (millis() + random(1000));
-    maxMineTimeMS = 3000;
-
-  #if TEST_COLLISIONS
-    for (int i = 0; i < mines.Size(); i++) {
-      AddMine(true);
-    }
-  #endif
   }
 };

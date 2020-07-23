@@ -4,6 +4,8 @@
 #include "HiScore.h"
 
 Arduboy2 arduboy;
+ArduboyPlaytune music(arduboy.audio.enabled);
+ArduboyPlaytune tones(arduboy.audio.enabled);
 
 const Rect BoundTop(0, -HEIGHT, WIDTH, HEIGHT);
 const Rect BoundBottom(0, HEIGHT, WIDTH, HEIGHT);
@@ -22,6 +24,9 @@ void setup() {
 #endif
  
   randomSeed(analogRead(0));
+  
+  music.initChannel(PIN_SPEAKER_1);
+  tones.initChannel(PIN_SPEAKER_2);
 }
 
 void loop() {

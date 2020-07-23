@@ -43,20 +43,23 @@ void Sub::Update()
       x_ += vX_;
       
       if (Arduboy2Base::collide(tempRect, BoundRight) || Arduboy2Base::collide(tempRect, BoundLeft)) {
-        if (vX_ >= 0) {
+        if (movingRight) {
           x_ -= 10;
         }
         else {
           x_ += 10;
         }
+        movingRight = !movingRight;
         vX_ = -vX_;
       }
     }
 #else 
     if (arduboy.pressed(LEFT_BUTTON)) {
+      movingRight = false;
       x_ -= 5;
     }
     if (arduboy.pressed(RIGHT_BUTTON)) {
+      movingRight = true;
       x_ += 5;
     }
     if (arduboy.pressed(UP_BUTTON)) {
@@ -77,18 +80,21 @@ void Sub::Update()
 }
 void Sub::Draw()
 {
+  int spriteNo = 0;
   if (valid_) {
-    vX_ >= 0 ? Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 0) : Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 1);
+    spriteNo = movingRight ? 0 : 1;
   }
   else {
-    vX_ >= 0 ? Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 2) : Sprites::drawOverwrite(x_/10, y_/10, SubSprite, 3);
+    spriteNo = movingRight ? 2 : 3;
   }
+  
+  Sprites::drawOverwrite(x_/10, y_/10, SubSprite, spriteNo);
+    
 #if TEST_COLLISIONS
   DrawBoundingBox();
 #endif
 }
 
-// TODO: Need to fix bubbles so that when its travelling in the reverse direction they get added to the correct place.
 void Sub::UpdateBubbles(bool diving, bool crashed)
 {
   if ((millis() - lastBubble) >= bubblePeriod) {
@@ -96,17 +102,17 @@ void Sub::UpdateBubbles(bool diving, bool crashed)
 
     if (crashed) {
       bubblePeriod = random(300, 800);
-      game.bubbles.Add(Bubble((x_/10) + random(0, 8), (y_/10) + random(0, 2)));
+      game.bubbles.Add(Bubble((x_/10) + random(0, Width()), (y_/10) + random(0, Height())));
     }
     else {
       bubblePeriod = random(500, 1000);
       if (diving) {
         // Add bubble on top of sub.
-        game.bubbles.Add(Bubble((x_/10)+1, (y_/10)+1));
+        movingRight ? game.bubbles.Add(Bubble((x_/10)+1, (y_/10)+1)) : game.bubbles.Add(Bubble((x_/10)+Width()-2, (y_/10)+1));
       }
       else {
         // Add bubble behind sub
-        game.bubbles.Add(Bubble((x_/10)-1, (y_/10)+1));
+        movingRight ? game.bubbles.Add(Bubble((x_/10)-1, (y_/10)+1)) : game.bubbles.Add(Bubble((x_/10)+Width(), (y_/10)+1));
       }
     }
   }

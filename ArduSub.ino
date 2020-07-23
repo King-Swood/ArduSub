@@ -5,7 +5,6 @@
 
 Arduboy2 arduboy;
 
-// TODO: Work out how to statically initialise these and put them in PROGMEM
 const Rect BoundTop(0, -HEIGHT, WIDTH, HEIGHT);
 const Rect BoundBottom(0, HEIGHT, WIDTH, HEIGHT);
 const Rect BoundScreen(0, 0, WIDTH, HEIGHT);

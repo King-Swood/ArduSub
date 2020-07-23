@@ -32,11 +32,11 @@ public:
   }
 
   int Width() const override {return SubSprite[0];}
-  int Height() const override {return SubSprite[1];}
+  int Height() const override {return 3;}
   
   Rect BoundingBox() const override
   {
-      return Rect(x_/10, (y_/10)+3, 8, 3);
+    return Rect(x_/10, (y_/10)+3, 8, 3);
   }
   
   void Update() override;
@@ -46,4 +46,5 @@ private:
   long unsigned lastBubble = millis();
   long unsigned lastMove = millis();
   unsigned bubblePeriod = 333;
+  bool movingRight = true;
 };

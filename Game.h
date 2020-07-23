@@ -10,9 +10,7 @@ extern Arduboy2 arduboy;
 // TODO: Add timer to top of screen.
 // TODO: Make it so we can enable/disable player control for the sub.
 //        This way we can call the subs update function as it moves onto the screen, and animate it/cause bubbles.
-// TODO: It would be good to be able to update bubbles/mines in all states, so bubbles come off the sub as it enters the screen.
 // TODO: Start adding audio.
-// TODO: Handle the case where the player reaches the edge of the screen.
 
 enum class GameState {
   Initial,
@@ -212,13 +210,17 @@ private:
     mines.UpdateAll([](Mine& mine, Game* game)
     {
       if (game->sub.IsColliding(mine)) {
+#if !DISABLE_PLAYER_COLLISION
         game->sub.Invalidate();
+#endif
       }
     }, this);
     
     Rect tempRect = sub.BoundingBox();
     if (Arduboy2Base::collide(tempRect, BoundTop) || Arduboy2Base::collide(tempRect, BoundBottom)) {
+#if !DISABLE_PLAYER_COLLISION
         sub.Invalidate();
+#endif
     }
     
     if (millis() > nextMineTimeMS) {

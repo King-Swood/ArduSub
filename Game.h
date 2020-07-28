@@ -186,7 +186,7 @@ private:
     {
       if (game->sub.IsColliding(mine)) {
 #if !DISABLE_PLAYER_COLLISION
-        if (!onFloor) {
+        if (!game->onFloor) {
           game->sub.Invalidate();
           music.playScore(Crash);
         }

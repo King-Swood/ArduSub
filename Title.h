@@ -199,9 +199,14 @@ public:
     Sprites::drawOverwrite(0, 0, TitleSprite, 0);
 
     if (!hidden_) {
+      arduboy.setTextSize(1);
       arduboy.setCursor(90,33);
       arduboy.print("A or B");
     }
+    
+    arduboy.setTextSize(0);
+    arduboy.setCursor(99,57);
+    arduboy.print(VERSION_NO);
   }
 
   bool IsPlayingGame() const

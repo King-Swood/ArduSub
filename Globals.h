@@ -1,6 +1,8 @@
 #pragma once
 #include <Arduboy2.h>
 
+#define VERSION_NO  "1.0.0"
+
 #define TEST_COLLISIONS 0
 //#define TEST_COLLISIONS 1
 
